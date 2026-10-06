@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Netflix Quiz</title>
+<style>
+  /* EDIT ME: swap these colors for your own. */
+  :root { --bg:#fcfcfb; --ink:#0b0b0b; --muted:#52514e; --line:#e1e0d9; --card:#ffffff;
+          --accent:#2a78d6; --good:#006300; --bad:#d03b3b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); line-height:1.5;
+         font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:28px 16px 56px; }
+  h1 { margin:0 0 4px; font-size:1.7rem; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .tabs { display:flex; gap:8px; margin-bottom:20px; }
+  button { font:inherit; cursor:pointer; }
+  .tab { flex:1; padding:10px; border:1px solid var(--line); background:var(--card); border-radius:8px; color:var(--ink); }
+  .tab[aria-selected="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
+  .count { color:var(--muted); font-size:.9rem; margin-bottom:8px; }
+  .q { font-size:1.15rem; font-weight:600; margin:0 0 14px; }
+  .opt { display:block; width:100%; text-align:left; padding:12px 14px; margin:8px 0;
+         border:1px solid var(--line); background:var(--bg); border-radius:8px; color:var(--ink); }
+  .opt:hover:not(:disabled) { border-color:var(--accent); }
+  .opt.right { border:2px solid var(--good); }
+  .opt.wrong { border:2px solid var(--bad); }
+  .note { margin:12px 0 0; min-height:2.6em; color:var(--muted); }
+  .next, .primary { margin-top:12px; padding:10px 18px; border:0; border-radius:8px; background:var(--accent); color:#fff; }
+  .card { width:100%; min-height:200px; border:1px solid var(--line); border-radius:12px; background:var(--bg);
+          padding:24px; font-size:1.15rem; text-align:center; color:var(--ink); }
+  .card .hint { display:block; color:var(--muted); font-size:.85rem; margin-top:12px; }
+  .nav { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+  .nav button { padding:8px 14px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); }
+  .score { font-size:2rem; font-weight:700; margin:8px 0; }
+  [hidden] { display:none !important; }
+</style></head>
+<body><main>
+<h1>Netflix Quiz</h1>
+<p class="sub">Based on a Netflix catalog dataset from Kaggle (through 2021).</p>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tab-quiz" aria-selected="true">Quiz</button>
+  <button class="tab" role="tab" id="tab-cards" aria-selected="false">Flashcards</button>
+</div>
+
+<section class="panel" id="quiz"></section>
+<section class="panel" id="cards" hidden></section>
+</main>
+
+<script>
+// EDIT ME: every question lives in this list. Change the text, options, answer index (starts at 0), or the explanation.
+const QUESTIONS = [
+  {
+    "q": "In what year was the movie \"Badland\" released?",
+    "options": [
+      "2017",
+      "2021",
+      "2020",
+      "2019"
+    ],
+    "answer": 3,
+    "explain": "\"Badland\" came out in 2019."
+  },
+  {
+    "q": "In what year was the movie \"Tim Allen: Men Are Pigs\" released?",
+    "options": [
+      "1992",
+      "1990",
+      "1986",
+      "1993"
+    ],
+    "answer": 1,
+    "explain": "\"Tim Allen: Men Are Pigs\" came out in 1990."
+  },
+  {
+    "q": "Which country is listed for \"Soy Rada: Serendipity\"?",
+    "options": [
+      "Argentina",
+      "India",
+      "Canada",
+      "South Korea"
+    ],
+    "answer": 0,
+    "explain": "The dataset lists Argentina for \"Soy Rada: Serendipity\"."
+  },
+  {
+    "q": "Which country is listed for \"Stree\"?",
+    "options": [
+      "India",
+      "Belgium",
+      "Nepal",
+      "Sweden"
+    ],
+    "answer": 0,
+    "explain": "The dataset lists India for \"Stree\"."
+  },
+  {
+    "q": "What is the rating of \"Soy Rada: Serendipity\"?",
+    "options": [
+      "R",
+      "TV-14",
+      "TV-MA",
+      "TV-PG"
+    ],
+    "answer": 2,
+    "explain": "\"Soy Rada: Serendipity\" is rated TV-MA."
+  },
+  {
+    "q": "Who directed \"Dorasaani\"?",
+    "options": [
+      "Subhash Ghai",
+      "Don Michael Paul",
+      "July Hygreck",
+      "KVR Mahendra"
+    ],
+    "answer": 3,
+    "explain": "\"Dorasaani\" was directed by KVR Mahendra."
+  },
+  {
+    "q": "Which of these is a TV show?",
+    "options": [
+      "Thiago Ventura: POKAS",
+      "MI-5",
+      "Pulp Fiction",
+      "The Innocent Man"
+    ],
+    "answer": 3,
+    "explain": "\"The Innocent Man\" is a TV show. The other three are movies."
+  },
+  {
+    "q": "Which of these actors appears in \"GANTZ:O\"?",
+    "options": [
+      "Robert Kazinsky",
+      "Himani Shivpuri",
+      "Lalu Alex",
+      "Daisuke Ono"
+    ],
+    "answer": 3,
+    "explain": "Daisuke Ono is in the cast of \"GANTZ:O\"."
+  },
+  {
+    "q": "Which genre is \"Rememory\" listed under?",
+    "options": [
+      "Thrillers",
+      "Dramas",
+      "LGBTQ Movies",
+      "Romantic TV Shows"
+    ],
+    "answer": 1,
+    "explain": "\"Rememory\" is listed under: Dramas, Sci-Fi & Fantasy."
+  },
+  {
+    "q": "Roughly what share of the full dataset's 8,807 titles are movies?",
+    "options": [
+      "70%",
+      "45%",
+      "58%",
+      "90%"
+    ],
+    "answer": 0,
+    "explain": "6,131 of 8,807 titles are movies, about 70%. The rest are TV shows."
+  }
+];
+
+const quizEl = document.getElementById("quiz");
+const cardsEl = document.getElementById("cards");
+const tabQuiz = document.getElementById("tab-quiz");
+const tabCards = document.getElementById("tab-cards");
+
+function show(which) {
+  const isQuiz = which === "quiz";
+  quizEl.hidden = !isQuiz; cardsEl.hidden = isQuiz;
+  tabQuiz.setAttribute("aria-selected", isQuiz); tabCards.setAttribute("aria-selected", !isQuiz);
+}
+tabQuiz.onclick = () => show("quiz");
+tabCards.onclick = () => show("cards");
+
+// ---- Quiz mode
+let i = 0, score = 0;
+function renderQuestion() {
+  const q = QUESTIONS[i];
+  quizEl.innerHTML = "";
+  const count = el("div", "count", `Question ${i + 1} of ${QUESTIONS.length}`);
+  const text = el("p", "q", q.q);
+  quizEl.append(count, text);
+  const note = el("p", "note", "");
+  q.options.forEach((opt, idx) => {
+    const b = el("button", "opt", opt);
+    b.onclick = () => {
+      const ok = idx === q.answer;
+      if (ok) score++;
+      quizEl.querySelectorAll(".opt").forEach((o, k) => {
+        o.disabled = true;
+        if (k === q.answer) { o.classList.add("right"); o.textContent = "\u2713 " + o.textContent; }
+        else if (k === idx) { o.classList.add("wrong"); o.textContent = "\u2717 " + o.textContent; }
+      });
+      note.textContent = (ok ? "Correct. " : "Not quite. ") + q.explain;
+      next.hidden = false;
+    };
+    quizEl.append(b);
+  });
+  const next = el("button", "next", i === QUESTIONS.length - 1 ? "See my score" : "Next question");
+  next.hidden = true;
+  next.onclick = () => { i++; i < QUESTIONS.length ? renderQuestion() : renderScore(); };
+  quizEl.append(note, next);
+}
+function renderScore() {
+  quizEl.innerHTML = "";
+  const msg = score >= 8 ? "You know your Netflix." : score >= 5 ? "Nice work." : "Good start. Try again!";
+  const s = el("div", "score", `${score} / ${QUESTIONS.length}`);
+  const b = el("button", "primary", "Try again");
+  b.onclick = () => { i = 0; score = 0; renderQuestion(); };
+  quizEl.append(el("div", "count", "Your score"), s, el("p", "", msg), b);
+}
+
+// ---- Flashcard mode
+let c = 0, flipped = false;
+function renderCard() {
+  const q = QUESTIONS[c];
+  cardsEl.innerHTML = "";
+  const card = el("button", "card", "");
+  const body = document.createElement("span");
+  body.textContent = flipped ? q.options[q.answer] : q.q;
+  const hint = el("span", "hint", flipped ? q.explain : "Click the card to flip it");
+  card.append(body, hint);
+  card.onclick = () => { flipped = !flipped; renderCard(); };
+  const nav = el("div", "nav", "");
+  const prev = el("button", "", "Previous");
+  const nxt = el("button", "", "Next");
+  const pos = el("span", "count", `${c + 1} / ${QUESTIONS.length}`);
+  prev.onclick = () => { c = (c - 1 + QUESTIONS.length) % QUESTIONS.length; flipped = false; renderCard(); };
+  nxt.onclick = () => { c = (c + 1) % QUESTIONS.length; flipped = false; renderCard(); };
+  nav.append(prev, pos, nxt);
+  cardsEl.append(card, nav);
+}
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text) e.textContent = text;
+  return e;
+}
+renderQuestion(); renderCard();
+</script></body></html>
