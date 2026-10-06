@@ -6,10 +6,10 @@ Build something from real data and publish it as a link you can put on your resu
 
 See what each track can look like. All four use the Netflix backup data.
 
-- [Dashboard](https://n0di0.github.io/YOUR-REPO/examples/dashboard.html)
-- [Quiz and Flashcards](https://n0di0.github.io/YOUR-REPO/examples/quiz.html)
-- [Knowledge Graph](https://n0di0.github.io/YOUR-REPO/examples/knowledge-graph.html)
-- [Case Study](https://n0di0.github.io/YOUR-REPO/examples/case-study.html)
+- [Dashboard](https://n0di0.github.io/wit-data-project/examples/dashboard.html)
+- [Quiz and Flashcards](https://n0di0.github.io/wit-data-project/examples/quiz.html)
+- [Knowledge Graph](https://n0di0.github.io/wit-data-project/examples/knowledge-graph.html)
+- [Case Study](https://n0di0.github.io/wit-data-project/examples/case-study.html)
 
 ## The steps
 
