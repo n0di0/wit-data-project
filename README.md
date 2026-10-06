@@ -2,6 +2,15 @@
 
 Build something from real data and publish it as a link you can put on your resume or LinkedIn. No experience needed.
 
+## Example projects
+
+See what each track can look like. All four use the Netflix backup data.
+
+- [Dashboard](https://YOURUSERNAME.github.io/YOUR-REPO/examples/dashboard.html)
+- [Quiz and Flashcards](https://YOURUSERNAME.github.io/YOUR-REPO/examples/quiz.html)
+- [Knowledge Graph](https://YOURUSERNAME.github.io/YOUR-REPO/examples/knowledge-graph.html)
+- [Case Study](https://YOURUSERNAME.github.io/YOUR-REPO/examples/case-study.html)
+
 ## The steps
 
 1. Pick a topic you're curious about.
